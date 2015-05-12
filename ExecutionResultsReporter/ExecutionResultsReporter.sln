@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecutionResultsReporter", "ExecutionResultsReporter.csproj", "{A5C32E15-25F8-45F2-9CFA-3E9098F010DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecutionResultsReporterTests", "..\ExecutionResultsReporterTests\ExecutionResultsReporterTests.csproj", "{279A5775-4ABB-4CB3-9D91-9466559C83C0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A5C32E15-25F8-45F2-9CFA-3E9098F010DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5C32E15-25F8-45F2-9CFA-3E9098F010DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5C32E15-25F8-45F2-9CFA-3E9098F010DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5C32E15-25F8-45F2-9CFA-3E9098F010DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{279A5775-4ABB-4CB3-9D91-9466559C83C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{279A5775-4ABB-4CB3-9D91-9466559C83C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{279A5775-4ABB-4CB3-9D91-9466559C83C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{279A5775-4ABB-4CB3-9D91-9466559C83C0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
