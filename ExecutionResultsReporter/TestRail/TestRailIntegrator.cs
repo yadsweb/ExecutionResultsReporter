@@ -7,34 +7,11 @@ using Newtonsoft.Json;
 
 namespace ExecutionResultsReporter.TestRail
 {
-    static class TestRailIntegrator
+    public static class TestRailIntegrator
     {
-        private static readonly ILog Log = LogManager.GetLogger("TestPlanCreator");
+        private static readonly ILog Log = LogManager.GetLogger("TestRailIntegrator");
         private static readonly ScenariosExtractor Extractor = new ScenariosExtractor();
         private static readonly ConfigurationRetriver CfgRetriver = new ConfigurationRetriver();
-        private static void Main(string[] args)
-        {
-            try
-            {
-                if (args.Count() < 5)
-                {
-                    throw new ArgumentException("The tool require some parameters! \n " +
-                                                "- action, this should have value 'add_scenarios' , 'create_complete_test_plan' or 'close_test_plan' \n " +
-                                                "- path to file store \n " +
-                                                "- path to app.config \n " +
-                                                "- test rail project id" +
-                                                "- path to dll which contains tests");
-                }
-                RunIntegration(args[0], args[1], args[2], args[3], args[4], null);
-
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception appear during execution!");
-                Log.Error(e.Message);
-                Log.Error(e.StackTrace);
-            }
-        }
 
         public static void RunIntegration(string action, string fileStore, string appConfigPath, string testRailProject, string testDllPath, string planId)
         {
