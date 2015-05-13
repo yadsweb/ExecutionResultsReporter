@@ -1,0 +1,15 @@
+﻿<?xml version="1.0"?>
+<package >
+<metadata>
+<id>Multipurpose.TestExecution.Reporter</id>
+<version>2.0.0</version>
+<authors>Yani</authors>
+<owners>BedeGaming</owners>
+<requireLicenseAcceptance>false</requireLicenseAcceptance>
+<description>This package contains functionality to report results from test execution to data base and test rail</description>
+<copyright>Copyright 2015</copyright>
+</metadata>
+<files>
+<file src="ExecutionResultsReporter\bin\**\*.*" target="lib\net45"/>
+</files>
+</package>

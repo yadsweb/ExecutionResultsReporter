@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Runtime.InteropServices;
 using ExecutionResultsReporter.TestRail.TestRailObj;
 using log4net;
 using Newtonsoft.Json;
@@ -200,7 +201,7 @@ namespace ExecutionResultsReporter.TestRail
                 return testRailConfigs;
             }
             _log.Debug("Configurations not found returning null");
-            return null;
+            return new List<ConfigurationGroup>();
         }
 
         public void LoadTestRailConfigurations()
@@ -223,7 +224,7 @@ namespace ExecutionResultsReporter.TestRail
 
         public PlanEntry AddPlanEntryToTestPlan(string planId, PlanEntry palnEntry)
         {
-            _log.Debug("Adding plan entry to project with id '" + _projectId+"' and test plan with id '"+planId+"'");
+            _log.Debug("Adding plan entry to project with id '" + _projectId + "' and test plan with id '" + planId + "'");
             var newPlanEntry = JsonConvert.DeserializeObject<PlanEntry>(_apiClient.SendPost("add_plan_entry/" + planId, palnEntry).ToString());
             _log.Debug("New plan entry with id '" + newPlanEntry.id + "' was created successful.");
             return newPlanEntry;
@@ -238,7 +239,7 @@ namespace ExecutionResultsReporter.TestRail
             var parsedData = new DataParser().Parse(_data);
             _log.Info("Retrieving test plan from file store.");
             var testPlan = new FileStoreIteractions(parsedData.FileStore).GetPlanFromFileStore();
-            _log.Info("Plan with id '"+testPlan.id+"' retrieved successful.");
+            _log.Info("Plan with id '" + testPlan.id + "' retrieved successful.");
             _log.Info("Retrieving test suite for current scenario.");
             LoadAllSuitesForProject();
             LoadAllTestCasesForProject();
@@ -262,70 +263,95 @@ namespace ExecutionResultsReporter.TestRail
             {
                 runs.AddRange(entry.runs);
             }
-            if (runs.Any() && !string.IsNullOrEmpty(parsedData.Configurations))
+            if (runs.Any())
             {
-                _log.Info("Current test plan have runs so searching for scenario with name '" + parsedData.ScenarioName + "' and configurations '" + parsedData.Configurations + "' in the list of runs.");
-                var configs = parsedData.Configurations.Split(new[] { " : " }, StringSplitOptions.None);
-                var configIds = new List<string>();
-                _log.Info("Trying to find all config id for current scenario.");
-                foreach (var config in configs)
-                {
-                    var configId = ReturnConfigurationId(config);
-                    _log.Info("Adding id '"+configId+"' to the list of config id's.");
-                    configIds.Add(configId);
-                }
-                _log.Info(configIds.Count+" configuration id's found.");
-                _log.Info("Trying to find run id for current scenario with specified configurations.");
-                var runId = "";
-                foreach (var testRun in runs.Where(testRun => testRun.config_ids.SequenceEqual(configIds) && testRun.suite_id == suteId))
-                {
-                    runId = testRun.id;
-                }
-                _log.Info("Run id '" + runId + "' found successful.");
-                _log.Info("Trying to find test case id for current scenario.");
-                var tests = RetriveTests(runId);
-                var testCaseId = "";
-                foreach (var test in tests)
-                {
-                    if (test.title == parsedData.ScenarioName)
-                    {
-                        testCaseId = test.case_id;
-                    }
-                }
-                if (string.IsNullOrEmpty(testCaseId))
-                {
-                    throw new Exception("Test case id can not be retrieved!");
-                }
-                _log.Info("Test case id '" + testCaseId + "' found.");
-
-                _log.Info("Trying to update the status of relevant test case.");
-                var comment = "";
-                if (parsedData.Status == "failed")
-                {
-                    var additionaData = parsedData.AdditionalData.Aggregate("", (current, line) => current + "\n" + line);
-                    comment = "Scenario failed becouse of error: \n\n" + parsedData.FailureStackTrace + "\n\n Screen shoot can be found here: " + parsedData.ScreenShotLocation + "\n\n Failing step is: " + parsedData.FailingStep + "\n\n" + additionaData;
-                }
-
-                var result = new Result
-                {
-                    case_id = testCaseId,
-                    status_id = ParsStatus(parsedData.Status),
-                    comment = comment,
-                    defects = parsedData.KnownIssues
-                };
-
-                var newReult = AddResultForCase(result ,runId,testCaseId);
-
+                var newReult = AddResultForTest(parsedData, runs, suteId);
                 if (newReult != null)
                 {
                     _log.Info("Result added successful for test case with id " + newReult.case_id);
                 }
                 else
                 {
-                    _log.Warn("Result was not added successful for test case with id " + testCaseId);
+                    _log.Warn("Result can not be added!");
                 }
             }
-           
+            else
+            {
+                throw new Exception("Runs for current test plan with id '" + testPlan.id + "' can not be retrieved!");
+            }
+        }
+
+        public Result AddResultForTest(TestCaseExecutionData parsedData, IEnumerable<TestRun> runs, string suteId)
+        {
+            _log.Info("Current test plan have runs so searching for scenario with name '" + parsedData.ScenarioName + "' and configurations '" + parsedData.Configurations + "' in the list of runs.");
+            var runId = "";
+            if (!string.IsNullOrEmpty(parsedData.Configurations))
+            {
+                var configs = parsedData.Configurations.Split(new[] { " : " }, StringSplitOptions.None);
+                var configIds = new List<string>();
+                _log.Info("Trying to find all config id for current scenario.");
+                foreach (var config in configs)
+                {
+                    var configId = ReturnConfigurationId(config);
+                    if (configId == null)
+                    {
+                        throw new Exception("Project with id '' probably don't have any configurations or load configuration method is not called!");
+                    }
+                    _log.Info("Adding id '" + configId + "' to the list of config id's.");
+                    configIds.Add(configId);
+                }
+                _log.Info(configIds.Count + " configuration id's found.");
+                _log.Info("Trying to find run id for current scenario with specified configurations.");
+
+                foreach (var testRun in runs.Where(testRun => testRun.config_ids.SequenceEqual(configIds) && testRun.suite_id == suteId))
+                {
+                    runId = testRun.id;
+                }
+            }
+            else
+            {
+                _log.Info("Trying to find run id for current scenario with specified configurations.");
+
+                foreach (var testRun in runs.Where(testRun => testRun.suite_id == suteId))
+                {
+                    runId = testRun.id;
+                }
+            }
+            if (string.IsNullOrEmpty(runId))
+            {
+                throw new Exception("Run id can not be found!");
+            }
+            _log.Info("Run id '" + runId + "' found successful.");
+            _log.Info("Trying to find test case id for current scenario.");
+            var tests = RetriveTests(runId);
+            var testCaseId = "";
+            foreach (var test in tests)
+            {
+                if (test.title == parsedData.ScenarioName)
+                {
+                    testCaseId = test.case_id;
+                }
+            }
+            if (string.IsNullOrEmpty(testCaseId))
+            {
+                throw new Exception("Test case id can not be retrieved!");
+            }
+            _log.Info("Test case id '" + testCaseId + "' found.");
+            _log.Info("Trying to update the status of relevant test case.");
+            var comment = "";
+            if (parsedData.Status == "failed")
+            {
+                var additionaData = parsedData.AdditionalData.Aggregate("", (current, line) => current + "\n" + line);
+                comment = "Scenario failed becouse of error: \n\n" + parsedData.FailureStackTrace + "\n\n Screen shoot can be found here: " + parsedData.ScreenShotLocation + "\n\n Failing step is: " + parsedData.FailingStep + "\n\n" + additionaData;
+            }
+            var result = new Result
+            {
+                case_id = testCaseId,
+                status_id = ParsStatus(parsedData.Status),
+                comment = comment,
+                defects = parsedData.KnownIssues
+            };
+            return AddResultForCase(result, runId, testCaseId);
         }
 
         public Result AddResultForCase(Result result, string runId, string caseId)
@@ -343,7 +369,7 @@ namespace ExecutionResultsReporter.TestRail
             return JsonConvert.DeserializeObject<List<Test>>(_apiClient.SendGet("get_tests/" + runId).ToString());
         }
 
-        public string GetTestPlan(String id)
+        public string GetTestPlanAsString(String id)
         {
             return _apiClient.SendGet("get_plan/" + id).ToString();
         }
@@ -405,27 +431,27 @@ namespace ExecutionResultsReporter.TestRail
             switch (status.ToLower())
             {
                 case "passed":
-                {
-                    return "1";
-                }
+                    {
+                        return "1";
+                    }
                 case "blocked":
-                {
-                    return "2";
-                }
+                    {
+                        return "2";
+                    }
                 case "untested":
-                {
-                    return "3";
-                }
+                    {
+                        return "3";
+                    }
                 case "retest":
-                {
-                    return "4";
-                }
+                    {
+                        return "4";
+                    }
                 case "failed":
-                {
-                    return "5";
-                }
+                    {
+                        return "5";
+                    }
                 default:
-                    throw new Exception("Provided status '"+status+"' is not supported!");
+                    throw new Exception("Provided status '" + status + "' is not supported!");
             }
         }
     }
