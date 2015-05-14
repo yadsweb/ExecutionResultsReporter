@@ -53,6 +53,12 @@ namespace ExecutionResultsReporter.TestRail
             };
             Log.Info("Creation of api client with test rail url '" + appConfig.AppSettings.Settings["TestRail.Url"].Value + "', test rail user name '" + appConfig.AppSettings.Settings["TestRail.Username"].Value + "' and test rail password '" + appConfig.AppSettings.Settings["TestRail.Password"].Value + "' successful.");
             reporter.SetApiClient(apiClient);
+            Log.Info("Loading all test suites for project '" + testRailProject + "'.");
+            reporter.LoadAllSuitesForProject();
+            Log.Info("Loading successful.");
+            Log.Info("Loading all test cases for project '" + testRailProject + "'.");
+            reporter.LoadAllTestCasesForProject();
+            Log.Info("Loading successful.");
             switch (action.ToLower())
             {
                 case "add_scenarios":
@@ -79,12 +85,7 @@ namespace ExecutionResultsReporter.TestRail
                         {
                             Log.Info("\t " + testCase.title);
                         }
-                        Log.Info("Loading all test suites for project '" + testRailProject + "'.");
-                        reporter.LoadAllSuitesForProject();
-                        Log.Info("Loading successful.");
-                        Log.Info("Loading all test cases for project '" + testRailProject + "'.");
-                        reporter.LoadAllTestCasesForProject();
-                        Log.Info("Loading successful.");
+                        
                         if (!relevantTestCase.Any())
                         {
                             Log.Info("There were no test cases marked for execution.");
