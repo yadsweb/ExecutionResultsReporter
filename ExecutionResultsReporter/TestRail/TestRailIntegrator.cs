@@ -53,10 +53,9 @@ namespace ExecutionResultsReporter.TestRail
             };
             Log.Info("Creation of api client with test rail url '" + appConfig.AppSettings.Settings["TestRail.Url"].Value + "', test rail user name '" + appConfig.AppSettings.Settings["TestRail.Username"].Value + "' and test rail password '" + appConfig.AppSettings.Settings["TestRail.Password"].Value + "' successful.");
             reporter.SetApiClient(apiClient);
-            Log.Info("Loading all test suites for project '" + testRailProject + "'.");
+            
+            Log.Info("Loading all test suites and cases for project '" + testRailProject + "'.");
             reporter.LoadAllSuitesForProject();
-            Log.Info("Loading successful.");
-            Log.Info("Loading all test cases for project '" + testRailProject + "'.");
             reporter.LoadAllTestCasesForProject();
             Log.Info("Loading successful.");
             switch (action.ToLower())
@@ -80,6 +79,10 @@ namespace ExecutionResultsReporter.TestRail
                         var executionCategory = appConfig.AppSettings.Settings["Execution.Tag"].Value;
                         Log.Info("Trying to add missing test cases to test rail.");
                         var relevantTestCase = reporter.CreatListWithRelevantTestCaseObjects(scenarious, executionCategory);
+                        Log.Info("Reloading all test suites and cases for project '" + testRailProject + "'.");
+                        reporter.LoadAllSuitesForProject();
+                        reporter.LoadAllTestCasesForProject();
+                        Log.Info("Loading successful.");
                         Log.Info("Test rail now include this test cases.");
                         foreach (var testCase in relevantTestCase)
                         {
