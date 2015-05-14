@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
 using ExecutionResultsReporter.TestRail.TestRailObj;
 using log4net;
 using Newtonsoft.Json;
@@ -233,6 +231,10 @@ namespace ExecutionResultsReporter.TestRail
 
         public void Report()
         {
+            if (_apiClient == null)
+            {
+                CreateApiClient();
+            }
             if (_data == null)
             {
                 throw new Exception("The data object which needs to contains information that will be send to test rail is null!");
