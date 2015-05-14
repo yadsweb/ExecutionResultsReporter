@@ -72,20 +72,24 @@ namespace ExecutionResultsReporter.TestRail
                     {
                         var scenarious = Extractor.RetriveScenarioInformation(testDllPath);
                         var executionCategory = appConfig.AppSettings.Settings["Execution.Tag"].Value;
+                        Log.Info("Trying to add missing test cases to test rail.");
+                        var relevantTestCase = reporter.CreatListWithRelevantTestCaseObjects(scenarious, executionCategory);
+                        Log.Info("Test rail now include this test cases.");
+                        foreach (var testCase in relevantTestCase)
+                        {
+                            Log.Info("\t " + testCase.title);
+                        }
                         Log.Info("Loading all test suites for project '" + testRailProject + "'.");
                         reporter.LoadAllSuitesForProject();
                         Log.Info("Loading successful.");
                         Log.Info("Loading all test cases for project '" + testRailProject + "'.");
                         reporter.LoadAllTestCasesForProject();
                         Log.Info("Loading successful.");
-                        Log.Info("Creating a list with only relevant test cases (test cases which have category equals to the execution tag).");
-                        var relevantTestCase = reporter.CreatListWithRelevantTestCaseObjects(scenarious, executionCategory);
                         if (!relevantTestCase.Any())
                         {
                             Log.Info("There were no test cases marked for execution.");
                             return null;
                         }
-                        Log.Info("List with '" + relevantTestCase.Count + "' test cases created successful.");
                         Log.Info("Creating a list with all suites for relevant test cases");
                         var suites = new List<string>();
                         foreach (var testcase in relevantTestCase.Where(testcase => !suites.Contains(testcase.suite_id)))
