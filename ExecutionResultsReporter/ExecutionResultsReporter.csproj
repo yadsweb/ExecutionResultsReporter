@@ -82,6 +82,7 @@
     <Compile Include="TestRail\TestRailObj\TestPlan.cs" />
     <Compile Include="TestRail\TestRailObj\TestRun.cs" />
     <Compile Include="TestRail\TestRailObj\TestSute.cs" />
+    <Compile Include="TestRail\TestRailObj\User.cs" />
     <Compile Include="TestRail\TestRailReporter.cs" />
     <Compile Include="TestRail\TestRailObj\TestCase.cs" />
   </ItemGroup>

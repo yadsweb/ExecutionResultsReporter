@@ -8,17 +8,18 @@
 <requireLicenseAcceptance>false</requireLicenseAcceptance>
 <description>This package contains functionality to report results from test execution to data base and test rail</description>
 <copyright>Copyright 2015</copyright>
-  <dependencies>
-    <dependency id="log4net" version="2.0.3"/>
-    <dependency id="MySql.Data" version="6.9.6"/>
-    <dependency id="Newtonsoft.Json" version="6.0.8"/>
-    <dependency id="NUnit" version="2.6.4"/>
-  </dependencies>
 </metadata>
 <files>
   <file src="ExecutionResultsReporter\bin\**\ExecutionResultsReporter.dll" target="lib\net45"/>
   <file src="ExecutionResultsReporter\bin\**\ExecutionResultsReporter.dll.config" target="lib\net45"/>
   <file src="ExecutionResultsReporter\bin\**\ExecutionResultsReporter.pdb" target="lib\net45"/>
+  <file src="ExecutionResultsReporter\bin\**\log4net.dll" target="lib\net45"/>
+  <file src="ExecutionResultsReporter\bin\**\log4net.xml" target="lib\net45"/>
+  <file src="ExecutionResultsReporter\bin\**\MySql.Data.dll" target="lib\net45"/>
+  <file src="ExecutionResultsReporter\bin\**\Newtonsoft.Json.dll" target="lib\net45"/>
+  <file src="ExecutionResultsReporter\bin\**\Newtonsoft.Json.xml" target="lib\net45"/>
+  <file src="ExecutionResultsReporter\bin\**\nunit.framework.dll" target="lib\net45"/>
+  <file src="ExecutionResultsReporter\bin\**\nunit.framework.xml" target="lib\net45"/>
   <file src="ResultReporterExecutable\bin\**\ResultReporterExecutable.exe" target="lib\net45"/>
   <file src="ResultReporterExecutable\bin\**\ResultReporterExecutable.exe.config" target="lib\net45"/>
   <file src="ResultReporterExecutable\bin\**\ResultReporterExecutable.pdb" target="lib\net45"/>

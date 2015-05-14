@@ -45,19 +45,20 @@ namespace ExecutionResultsReporter.TestRail
             var appConfig = CfgRetriver.ReturnConfiguration(appConfigPath);
             var reporter = new TestRailReporter(Convert.ToInt32(testRailProject));
             Log.Info("Trying to create new test rail api client!");
-            var apiClient = new ApiClient(appConfig.AppSettings.Settings["TestRail.url"].Value)
+            var user = appConfig.AppSettings.Settings["TestRail.Username"].Value;
+            var apiClient = new ApiClient(appConfig.AppSettings.Settings["TestRail.Url"].Value)
             {
-                User = appConfig.AppSettings.Settings["TestRail.username"].Value,
-                Password = appConfig.AppSettings.Settings["TestRail.password"].Value
+                User = user,
+                Password = appConfig.AppSettings.Settings["TestRail.Password"].Value
             };
-            Log.Info("Creation of api client with test rail url '" + appConfig.AppSettings.Settings["TestRail.url"].Value + "', test rail user name '" + appConfig.AppSettings.Settings["TestRail.username"].Value + "' and test rail password '" + appConfig.AppSettings.Settings["TestRail.password"].Value + "' successful.");
+            Log.Info("Creation of api client with test rail url '" + appConfig.AppSettings.Settings["TestRail.Url"].Value + "', test rail user name '" + appConfig.AppSettings.Settings["TestRail.Username"].Value + "' and test rail password '" + appConfig.AppSettings.Settings["TestRail.Password"].Value + "' successful.");
             reporter.SetApiClient(apiClient);
             switch (action.ToLower())
             {
                 case "add_scenarios":
                     {
                         var scenarious = Extractor.RetriveScenarioInformation(testDllPath);
-                        var executionCategory = appConfig.AppSettings.Settings["Execution.tag"].Value;
+                        var executionCategory = appConfig.AppSettings.Settings["Execution.Tag"].Value;
                         Log.Info("Trying to add missing test cases to test rail.");
                         var relevantTestCase = reporter.CreatListWithRelevantTestCaseObjects(scenarious, executionCategory);
                         Log.Info("Test rail now include this test cases.");
@@ -70,7 +71,7 @@ namespace ExecutionResultsReporter.TestRail
                 case "create_complete_test_plan":
                     {
                         var scenarious = Extractor.RetriveScenarioInformation(testDllPath);
-                        var executionCategory = appConfig.AppSettings.Settings["Execution.tag"].Value;
+                        var executionCategory = appConfig.AppSettings.Settings["Execution.Tag"].Value;
                         Log.Info("Loading all test suites for project '" + testRailProject + "'.");
                         reporter.LoadAllSuitesForProject();
                         Log.Info("Loading successful.");
@@ -95,9 +96,27 @@ namespace ExecutionResultsReporter.TestRail
                         Log.Info("Creating a list with grouped by suites test cases");
                         var groupedBySuiteTestCases = suites.Select(suite => relevantTestCase.Where(testcase => testcase.suite_id == suite).ToList()).ToList();
                         Log.Info("List with '" + groupedBySuiteTestCases.Count + "' groups created.");
+                        var executionTag = "";
+                        var environment = "";
+                        try
+                        {
+                            executionTag = appConfig.AppSettings.Settings["Execution.Tag"].Value;
+                        }
+                        catch (Exception)
+                        {
+                            Log.Warn("Execution tag (Execution.tag) from app.config can not be retrieved");
+                        }
+                        try
+                        {
+                            environment = appConfig.AppSettings.Settings["Execution.Environment"].Value;
+                        }
+                        catch (Exception)
+                        {
+                            Log.Warn("Execution environment (Execution.Environment) from app.config can not be retrieved");
+                        }
                         var testPlanName = "Automation test plan from '" + DateTime.UtcNow.ToString("yyyy/MM/dd hh:mm:ss") +
-                                           "(UTC)' for tests with category '" + appConfig.AppSettings.Settings["Execution.tag"].Value +
-                                           "' and environment '" + appConfig.AppSettings.Settings["Execution.Environment"].Value + "'";
+                                           "(UTC)' for tests with category '" + executionTag +
+                                           "' and environment '" + environment + "'";
                         Log.Info("Creating test plan with name: " + testPlanName);
                         var testPlan = reporter.CreateTestPlan(testPlanName, "Test plan created by automation to store tests results");
                         Log.Info("Plan with id '" + testPlan.id + "' created successfully.");
@@ -140,6 +159,13 @@ namespace ExecutionResultsReporter.TestRail
                                 relevantConfigurationIdsGrouped.Add(tempList);
                             }
                             Log.Info("List created with '" + relevantConfigurationIdsGrouped.Count + "' configuration groups.");
+                        }
+                        Log.Info("Trying to find user id of user with e-mail: " + user);
+                        var userId = reporter.ReturnUserId(user);
+                        if (string.IsNullOrEmpty(userId))
+                        {
+                            Log.Warn("User id is empty so we set the it to default value of 1!");
+                            userId = "1";
                         }
                         if (relevantConfigurationIdsGrouped.Any())
                         {
@@ -195,7 +221,7 @@ namespace ExecutionResultsReporter.TestRail
                                 {
                                     id = null,
                                     suite_id = group.First().suite_id,
-                                    assignedto_id = "1",
+                                    assignedto_id = userId,
                                     include_all = false,
                                     case_ids = caseIds,
                                     config_ids = allConfigIds,
@@ -215,7 +241,7 @@ namespace ExecutionResultsReporter.TestRail
                                 {
                                     id = null,
                                     suite_id = group.First().suite_id,
-                                    assignedto_id = "1",
+                                    assignedto_id = userId,
                                     include_all = false,
                                     case_ids = casIds,
                                 };

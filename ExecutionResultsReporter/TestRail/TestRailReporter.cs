@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 using ExecutionResultsReporter.TestRail.TestRailObj;
 using log4net;
 using Newtonsoft.Json;
@@ -37,19 +38,19 @@ namespace ExecutionResultsReporter.TestRail
         private void CreateApiClient()
         {
             _log.Debug("Trying to create new test rail api client!");
-            if (ConfigurationManager.AppSettings.AllKeys.Contains("TestRail.url") | ConfigurationManager.AppSettings.AllKeys.Contains("TestRail.username") | ConfigurationManager.AppSettings.AllKeys.Contains("TestRail.password"))
+            if (ConfigurationManager.AppSettings.AllKeys.Contains("TestRail.Url") | ConfigurationManager.AppSettings.AllKeys.Contains("TestRail.Username") | ConfigurationManager.AppSettings.AllKeys.Contains("TestRail.Password"))
             {
-                _apiClient = new ApiClient(ConfigurationManager.AppSettings["TestRail.url"])
+                _apiClient = new ApiClient(ConfigurationManager.AppSettings["TestRail.Url"])
                 {
-                    User = ConfigurationManager.AppSettings["TestRail.username"],
-                    Password = ConfigurationManager.AppSettings["TestRail.password"]
+                    User = ConfigurationManager.AppSettings["TestRail.Username"],
+                    Password = ConfigurationManager.AppSettings["TestRail.Password"]
                 };
-                _log.Debug("Creation of api client with test rail url '" + ConfigurationManager.AppSettings["TestRail.url"] + "', test rail user name '" + ConfigurationManager.AppSettings["TestRail.username"] + "' and test rail password '" + ConfigurationManager.AppSettings["TestRail.password"] + "' successful.");
+                _log.Debug("Creation of api client with test rail url '" + ConfigurationManager.AppSettings["TestRail.Url"] + "', test rail user name '" + ConfigurationManager.AppSettings["TestRail.Username"] + "' and test rail password '" + ConfigurationManager.AppSettings["TestRail.Password"] + "' successful.");
             }
             else
             {
                 _log.Error("Creation of test rail client failed!");
-                throw new Exception("Error, it seems that test rail url, test rail password or test rail user name in app.config under 'TestRail.url', 'TestRail.username' or 'TestRail.password' property is not present!");
+                throw new Exception("Error, it seems that test rail url, test rail password or test rail user name in app.config under 'TestRail.Url', 'TestRail.Username' or 'TestRail.Password' property is not present!");
             }
         }
 
@@ -364,9 +365,28 @@ namespace ExecutionResultsReporter.TestRail
             return JsonConvert.DeserializeObject<TestPlan>(_apiClient.SendPost("add_plan/" + _projectId, new { name, description }).ToString());
         }
 
-        public List<Test> RetriveTests(string runId)
+        public IEnumerable<Test> RetriveTests(string runId)
         {
             return JsonConvert.DeserializeObject<List<Test>>(_apiClient.SendGet("get_tests/" + runId).ToString());
+        }
+
+        public IEnumerable<User> RetriveUsers()
+        {
+            return JsonConvert.DeserializeObject<List<User>>(_apiClient.SendGet("get_users/").ToString());
+        }
+
+        public string ReturnUserId(string email)
+        {
+            var allUsers = RetriveUsers();
+            foreach (var user in allUsers)
+            {
+                if (user.email == email)
+                {
+                    return user.id;
+                }
+            }
+            _log.Warn("User with e-mail '"+email+"' was not found!");
+            return null;
         }
 
         public string GetTestPlanAsString(String id)
