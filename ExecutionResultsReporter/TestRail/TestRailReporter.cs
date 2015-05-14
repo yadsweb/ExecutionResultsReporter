@@ -158,7 +158,7 @@ namespace ExecutionResultsReporter.TestRail
             _allTestCases.Clear();
             if (!_allSuites.Any())
             {
-                throw new Exception("There are currently no suites loaded, this mean that current project don't have suites or load suites method is not called!");
+                _log.Warn("There are currently no suites loaded, this mean that current project don't have suites or load suites method is not called!");
             }
             foreach (var sute in _allSuites)
             {
