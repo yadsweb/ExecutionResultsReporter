@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace ExecutionResultsReporter.TestRail
 {
-    class FileStoreIteractions
+    public class FileStoreIteractions
     {
         private readonly string _path;
         private static readonly ILog Log = LogManager.GetLogger("TestPlanCreator");

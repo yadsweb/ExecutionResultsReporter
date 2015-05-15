@@ -16,6 +16,7 @@ namespace ExecutionResultsReporter.TestRail
         private readonly int _projectId;
         private List<TestSute> _allSuites;
         private List<TestCase> _allTestCases;
+        private TestPlan _testPlan;
         private List<ConfigurationGroup> _allConfigurations;
 
         public TestRailReporter(int projectId)
@@ -62,6 +63,19 @@ namespace ExecutionResultsReporter.TestRail
             _allSuites.Clear();
             _log.Debug("Extracting all suites from project with id: " + _projectId);
             var suites = JsonConvert.DeserializeObject<List<TestSute>>(_apiClient.SendGet("get_suites/" + _projectId).ToString());
+            _log.Debug(suites.Count + " suets retrieved.");
+            _allSuites = suites.ToList();
+        }
+
+        public void LoadAllSuitesForTestPlan(TestPlan testPlan)
+        {
+            _allSuites.Clear();
+            _log.Debug("Extracting all suites from test plan with id: " + testPlan.id);
+            var suites = JsonConvert.DeserializeObject<List<TestSute>>(_apiClient.SendGet("get_suites/" + _projectId).ToString());
+            foreach (var suite in testPlan.entries.SelectMany(entry => suites.Where(suite => suite.id == entry.suite_id)))
+            {
+                _allSuites.Add(suite);
+            }
             _log.Debug(suites.Count + " suets retrieved.");
             _allSuites = suites.ToList();
         }
@@ -229,6 +243,12 @@ namespace ExecutionResultsReporter.TestRail
             return newPlanEntry;
         }
 
+        public void Report(TestPlan plan)
+        {
+            _testPlan = plan;
+            Report();
+        }
+
         public void Report()
         {
             if (_apiClient == null)
@@ -240,11 +260,18 @@ namespace ExecutionResultsReporter.TestRail
                 throw new Exception("The data object which needs to contains information that will be send to test rail is null!");
             }
             var parsedData = new DataParser().Parse(_data);
-            _log.Info("Retrieving test plan from file store.");
-            var testPlan = new FileStoreIteractions(parsedData.FileStore).GetPlanFromFileStore();
-            _log.Info("Plan with id '" + testPlan.id + "' retrieved successful.");
+            if (_testPlan == null)
+            {
+                _log.Info("Retrieving test plan from file store.");
+                _testPlan = new FileStoreIteractions(parsedData.FileStore).GetPlanFromFileStore();
+                _log.Info("Plan with id '" + _testPlan.id + "' retrieved successful."); 
+            }
+            else
+            {
+                _log.Info("Using test plan with id '" + _testPlan.id + "'.");
+            }
             _log.Info("Retrieving test suite for current scenario.");
-            LoadAllSuitesForProject();
+            LoadAllSuitesForTestPlan(_testPlan);
             LoadAllTestCasesForProject();
             var suteId = "";
             foreach (var testCase in _allTestCases)
@@ -262,7 +289,7 @@ namespace ExecutionResultsReporter.TestRail
             _log.Info("Suite id '" + suteId + "' retrieved successful.");
             var runs = new List<TestRun>();
             LoadTestRailConfigurations();
-            foreach (var entry in testPlan.entries)
+            foreach (var entry in _testPlan.entries)
             {
                 runs.AddRange(entry.runs);
             }
@@ -280,7 +307,7 @@ namespace ExecutionResultsReporter.TestRail
             }
             else
             {
-                throw new Exception("Runs for current test plan with id '" + testPlan.id + "' can not be retrieved!");
+                throw new Exception("Runs for current test plan with id '" + _testPlan.id + "' can not be retrieved!");
             }
         }
 
