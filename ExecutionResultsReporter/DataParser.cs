@@ -74,6 +74,10 @@ namespace ExecutionResultsReporter
                         _log.Debug("Matching key from dictionary to 'KnownIssue' so value '" + row.Value + "' will be added to the result.");
                         parseData.KnownIssues = row.Value;
                         break;
+                    case "duration":
+                        _log.Debug("Matching key from dictionary to 'duration' so value '" + row.Value + "' will be added to the result.");
+                        parseData.Duration = row.Value;
+                        break;
                     default:
                         _log.Debug("Provided key '"+row.Key+"' didn't match any pattern so it will be added to 'additional data' list property of the result");
                         parseData.AdditionalData.Add(row.Value);

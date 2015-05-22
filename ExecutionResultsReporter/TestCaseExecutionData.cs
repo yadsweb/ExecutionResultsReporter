@@ -20,6 +20,7 @@ namespace ExecutionResultsReporter
         public List<String> ScenarioCategories { get; private set; }
         public String StartDate { get; set; }
         public String EndDate { get; set; }
+        public String Duration { get; set; }
         public String Status { get; set; }
         public String FailingStep { get; set; }
         public String FailureStackTrace { get; set; }

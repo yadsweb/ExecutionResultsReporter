@@ -11,7 +11,7 @@ namespace ExecutionResultsReporter.TestRail
     public class TestRailReporter : IReporter
     {
         private readonly ILog _log = LogManager.GetLogger("TestRailReporter");
-        private readonly List<KeyValuePair<string, string>> _data;
+        private List<KeyValuePair<string, string>> _data;
         private ApiClient _apiClient;
         private readonly int _projectId;
         private List<TestSute> _allSuites;
@@ -31,6 +31,11 @@ namespace ExecutionResultsReporter.TestRail
             _projectId = projectId;
             _allSuites = new List<TestSute>();
             _allTestCases = new List<TestCase>();
+            _data = data;
+        }
+
+        public void SetData(List<KeyValuePair<string, string>> data)
+        {
             _data = data;
         }
 
@@ -379,7 +384,8 @@ namespace ExecutionResultsReporter.TestRail
                 case_id = testCaseId,
                 status_id = ParsStatus(parsedData.Status),
                 comment = comment,
-                defects = parsedData.KnownIssues
+                defects = parsedData.KnownIssues,
+                elapsed = parsedData.Duration
             };
             return AddResultForCase(result, runId, testCaseId);
         }
