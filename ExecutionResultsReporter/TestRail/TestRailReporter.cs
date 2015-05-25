@@ -377,7 +377,17 @@ namespace ExecutionResultsReporter.TestRail
             if (parsedData.Status == "failed")
             {
                 var additionaData = parsedData.AdditionalData.Aggregate("", (current, line) => current + "\n" + line);
-                comment = "Scenario failed becouse of error: \n\n" + parsedData.FailureStackTrace + "\n\n Screen shoot can be found here: " + parsedData.ScreenShotLocation + "\n\n Failing step is: " + parsedData.FailingStep + "\n\n" + additionaData;
+                var screenShootInfo = "";
+                var failingStep = "";
+                if (!string.IsNullOrEmpty(parsedData.ScreenShotLocation))
+                {
+                    screenShootInfo = "\n\n Screen shoot can be found here: " + parsedData.ScreenShotLocation;
+                }
+                if (!string.IsNullOrEmpty(parsedData.FailingStep))
+                {
+                    failingStep = "\n\n Failing step is: " + parsedData.FailingStep + "\n\n";
+                }
+                comment = "Scenario failed because of error related to: \n\n" + parsedData.FailureStackTrace + screenShootInfo + failingStep + additionaData;
             }
             var result = new Result
             {

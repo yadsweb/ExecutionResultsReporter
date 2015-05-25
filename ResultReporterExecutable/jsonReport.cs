@@ -13,8 +13,6 @@ namespace ResultReporterExecutable
         public string testrail_username { get; set; }
         public string testrail_password { get; set; }
         public List<Suite> suites { get; set; }
-
-
     }
     public class Spec
     {
