@@ -312,29 +312,32 @@ namespace ExecutionResultsReporter.TestRail
                 _log.Info("Scenario steps found in provided data, trying to update test case to contain provided steps.");
                 var preconditions = "";
                 var stepsList = new List<TestCaseStep>();
-                var previousStep = "";
+                var stepType = "";
                 var tmpStep = new TestCaseStep("", "");
                 foreach (var step in parsedData.ScenarioSteps)
                 {
-                    if (string.IsNullOrEmpty("previousStep"))
+                    if (string.IsNullOrEmpty(stepType))
                     {
-                        previousStep = step;
+                        stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
                     }
                     if (step.ToLower().StartsWith("given"))
                     {
                         preconditions = preconditions + " \n " + step;
+                        stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
                     }
                     if (step.ToLower().StartsWith("when"))
                     {
                         if (string.IsNullOrEmpty(tmpStep.content))
                         {
                             tmpStep.content = step;
+                            stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
                         }
                         else
                         {
                             stepsList.Add(tmpStep);
                             tmpStep.content = step;
                             tmpStep.expected = "";
+                            stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
                         }
                     }
                     if (step.ToLower().StartsWith("then"))
@@ -342,29 +345,29 @@ namespace ExecutionResultsReporter.TestRail
                         if (string.IsNullOrEmpty(tmpStep.expected))
                         {
                             tmpStep.expected = step;
+                            stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
                         }
                         else
                         {
                             tmpStep.expected = tmpStep.expected + "\n " + step;
+                            stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
                         }
                     }
                     if (step.ToLower().StartsWith("and"))
                     {
-                        if (previousStep.ToLower().StartsWith("given"))
+                        if (stepType.ToLower().StartsWith("given"))
                         {
                             preconditions = preconditions + " \n " + step;
                         }
-                        if (previousStep.ToLower().StartsWith("when"))
+                        if (stepType.ToLower().StartsWith("when"))
                         {
                             tmpStep.content = tmpStep.content + "\n " + step;
                         }
-                        if (previousStep.ToLower().StartsWith("then"))
+                        if (stepType.ToLower().StartsWith("then"))
                         {
                             tmpStep.expected = tmpStep.expected + "\n " + step;
                         }
                     }
-                    _log.Info("Setting previous step to: "+step);
-                    previousStep = step;
                 }
                 stepsList.Add(tmpStep);
                 foreach (var testCase in RetriveCasesByTestSuteId(suteId))
