@@ -74,10 +74,10 @@ namespace ResultReporterExecutable
                 if (args.Count() < 5)
                 {
                     throw new ArgumentException("The tool require some parameters! \n " +
-                                                "- action, this should have value 'add_scenarios' , 'create_complete_test_plan' or 'close_test_plan' \n " +
+                                                "- action, this should have value 'add_scenarios' , 'create_complete_test_plan' , 'close_test_plan' or 'report_results_from_json' \n " +
                                                 "- path to file store \n " +
                                                 "- path to app.config \n " +
-                                                "- test rail project id" +
+                                                "- test rail project id \n" +
                                                 "- path to dll which contains tests");
                 }
                 TestRailIntegrator.RunIntegration(args[0], args[1], args[2], args[3], args[4], null);

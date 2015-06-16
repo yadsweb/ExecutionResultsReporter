@@ -22,6 +22,6 @@ namespace ExecutionResultsReporter.TestRail.TestRailObj
         public string milestone_id { get; set; }
         public string custom_isreview { get; set; }
         public string custom_preconds { get; set; }
-        public string custom_steps_separated { get; set; }
+        public List<TestCaseStep> custom_steps_separated { get; set; }
     }
 }

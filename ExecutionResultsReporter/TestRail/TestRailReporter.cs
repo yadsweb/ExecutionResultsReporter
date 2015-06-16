@@ -99,6 +99,21 @@ namespace ExecutionResultsReporter.TestRail
             return null;
         }
 
+        public List<TestCase> RetriveCasesByTestSuteId(string suitId)
+        {
+            _log.Info("Trying to retrieve test cases for project with id '" + _projectId + "' and suite with id '" + suitId + "'.");
+            var testCase = JsonConvert.DeserializeObject<List<TestCase>>(_apiClient.SendGet("get_cases/" + _projectId + "&suite_id=" + suitId).ToString());
+            _log.Info(testCase.Count + " test cases retrieved.");
+            return testCase;
+        }
+
+        public void UpdateTestCase(TestCase testCase)
+        {
+            _log.Info("Trying to update test case with id '" + testCase.id + "'.");
+            var updatedTestCase = JsonConvert.DeserializeObject<TestCase>(_apiClient.SendPost("update_case/" + testCase.id, testCase).ToString());
+            _log.Info("Test case with id '" + updatedTestCase.id + "' updated successful.");
+        }
+
         public TestSute CreateNewSuiteIfNotExist(string suiteName)
         {
             TestSute newSuite;
@@ -269,7 +284,7 @@ namespace ExecutionResultsReporter.TestRail
             {
                 _log.Info("Retrieving test plan from file store.");
                 _testPlan = new FileStoreIteractions(parsedData.FileStore).GetPlanFromFileStore();
-                _log.Info("Plan with id '" + _testPlan.id + "' retrieved successful."); 
+                _log.Info("Plan with id '" + _testPlan.id + "' retrieved successful.");
             }
             else
             {
@@ -292,6 +307,78 @@ namespace ExecutionResultsReporter.TestRail
                 throw new Exception("Suite id can not be retrieved!");
             }
             _log.Info("Suite id '" + suteId + "' retrieved successful.");
+            if (parsedData.ScenarioSteps.Any())
+            {
+                _log.Info("Scenario steps found in provided data, trying to update test case to contain provided steps.");
+                var preconditions = "";
+                var stepsList = new List<TestCaseStep>();
+                var previousStep = "";
+                var tmpStep = new TestCaseStep("", "");
+                foreach (var step in parsedData.ScenarioSteps)
+                {
+                    if (string.IsNullOrEmpty("previousStep"))
+                    {
+                        previousStep = step;
+                    }
+                    if (step.ToLower().StartsWith("given"))
+                    {
+                        preconditions = preconditions + " \n " + step;
+                    }
+                    if (step.ToLower().StartsWith("when"))
+                    {
+                        if (string.IsNullOrEmpty(tmpStep.content))
+                        {
+                            tmpStep.content = step;
+                        }
+                        else
+                        {
+                            stepsList.Add(tmpStep);
+                            tmpStep.content = step;
+                            tmpStep.expected = "";
+                        }
+                    }
+                    if (step.ToLower().StartsWith("then"))
+                    {
+                        if (string.IsNullOrEmpty(tmpStep.expected))
+                        {
+                            tmpStep.expected = step;
+                        }
+                        else
+                        {
+                            tmpStep.expected = tmpStep.expected + "\n " + step;
+                        }
+                    }
+                    if (step.ToLower().StartsWith("and"))
+                    {
+                        if (previousStep.ToLower().StartsWith("given"))
+                        {
+                            preconditions = preconditions + " \n " + step;
+                        }
+                        if (previousStep.ToLower().StartsWith("when"))
+                        {
+                            tmpStep.content = tmpStep.content + "\n " + step;
+                        }
+                        if (previousStep.ToLower().StartsWith("then"))
+                        {
+                            tmpStep.expected = tmpStep.expected + "\n " + step;
+                        }
+                    }
+                    _log.Info("Setting previous step to: "+step);
+                    previousStep = step;
+                }
+                stepsList.Add(tmpStep);
+                foreach (var testCase in RetriveCasesByTestSuteId(suteId))
+                {
+                    if (testCase.title == parsedData.ScenarioName)
+                    {
+                        testCase.custom_preconds = preconditions;
+                        testCase.custom_steps_separated = stepsList;
+                        UpdateTestCase(testCase);
+                        break;
+                    }
+                }
+                _log.Info("Steps updated successful.");
+            }
             var runs = new List<TestRun>();
             LoadTestRailConfigurations();
             foreach (var entry in _testPlan.entries)
@@ -430,7 +517,7 @@ namespace ExecutionResultsReporter.TestRail
                     return user.id;
                 }
             }
-            _log.Warn("User with e-mail '"+email+"' was not found!");
+            _log.Warn("User with e-mail '" + email + "' was not found!");
             return null;
         }
 

@@ -2,7 +2,7 @@
 
 namespace ExecutionResultsReporter.TestRail.TestRailObj
 {
-    class TestCaseStep
+    public class TestCaseStep
     {
         public TestCaseStep(string Content, string Expected)
         {

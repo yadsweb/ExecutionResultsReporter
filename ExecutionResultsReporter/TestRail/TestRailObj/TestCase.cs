@@ -1,4 +1,6 @@
-﻿namespace ExecutionResultsReporter.TestRail.TestRailObj
+﻿using System.Collections.Generic;
+
+namespace ExecutionResultsReporter.TestRail.TestRailObj
 {
     public class TestCase
     {
@@ -16,5 +18,13 @@
        public string estimate { get; set; }
        public string estimate_forecast { get; set; }
        public string suite_id { get; set; }
+       public bool custom_isreview { get; set; }
+       public string custom_preconds { get; set; }
+       public List<TestCaseStep> custom_steps_separated { get; set; }
+
+        public TestCase()
+        {
+            custom_steps_separated = new List<TestCaseStep>();
+        }
     }
 }

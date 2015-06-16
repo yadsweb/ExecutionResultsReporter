@@ -121,8 +121,8 @@ namespace ExecutionResultsReporter.TestRail
 					byte[] block = Encoding.UTF8.GetBytes( 
 						JsonConvert.SerializeObject(data)
 					);
-
 					request.GetRequestStream().Write(block, 0, block.Length);
+                    //Console.WriteLine(JsonConvert.SerializeObject(data));
 				}
 			}
 
