@@ -96,6 +96,7 @@ namespace ExecutionResultsReporter.TestRail
 			// Create the request object and set the required HTTP method
 			// (GET/POST) and headers (content type and basic auth).
 			var request = (HttpWebRequest)WebRequest.Create(url);
+		    request.Timeout = 180000;
 			request.ContentType = "application/json";
 			request.Method = method;
 
