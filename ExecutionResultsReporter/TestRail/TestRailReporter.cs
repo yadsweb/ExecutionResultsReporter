@@ -323,53 +323,58 @@ namespace ExecutionResultsReporter.TestRail
                     if (step.ToLower().StartsWith("given"))
                     {
                         preconditions = preconditions + " \n " + step;
-                        stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
+                        stepType = "given";
+                        continue;
                     }
                     if (step.ToLower().StartsWith("when"))
                     {
                         if (string.IsNullOrEmpty(tmpStep.content))
                         {
                             tmpStep.content = step;
-                            stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
+                            stepType = "when";
                         }
                         else
                         {
-                            stepsList.Add(tmpStep);
+                            stepsList.Add(new TestCaseStep(tmpStep.content,tmpStep.expected));
                             tmpStep.content = step;
                             tmpStep.expected = "";
-                            stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
+                            stepType = "when";
                         }
+                        continue;
                     }
                     if (step.ToLower().StartsWith("then"))
                     {
                         if (string.IsNullOrEmpty(tmpStep.expected))
                         {
                             tmpStep.expected = step;
-                            stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
+                            stepType = "then";
                         }
                         else
                         {
                             tmpStep.expected = tmpStep.expected + "\n " + step;
-                            stepType = step.TrimStart().Substring(0, step.IndexOf(" ", StringComparison.Ordinal));
+                            stepType = "then";
                         }
+                        continue;
                     }
                     if (step.ToLower().StartsWith("and"))
                     {
-                        if (stepType.ToLower().StartsWith("given"))
+                        if (stepType == "given")
                         {
                             preconditions = preconditions + " \n " + step;
+                            continue;
                         }
-                        if (stepType.ToLower().StartsWith("when"))
+                        if (stepType == "when")
                         {
                             tmpStep.content = tmpStep.content + "\n " + step;
+                            continue;
                         }
-                        if (stepType.ToLower().StartsWith("then"))
+                        if (stepType == "then")
                         {
                             tmpStep.expected = tmpStep.expected + "\n " + step;
                         }
                     }
                 }
-                stepsList.Add(tmpStep);
+                stepsList.Add(new TestCaseStep(tmpStep.content, tmpStep.expected));
                 foreach (var testCase in RetriveCasesByTestSuteId(suteId))
                 {
                     if (testCase.title == parsedData.ScenarioName)
