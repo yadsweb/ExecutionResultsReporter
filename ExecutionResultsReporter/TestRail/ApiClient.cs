@@ -13,6 +13,7 @@ using System;
 using System.Net;
 using System.IO;
 using System.Text;
+using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -23,6 +24,7 @@ namespace ExecutionResultsReporter.TestRail
 		private string _mUser;
 		private string _mPassword;
 		private string _mUrl;
+        private readonly ILog _log = LogManager.GetLogger("ApiClient");
 
 		public ApiClient(string baseUrl)
 		{
@@ -159,6 +161,7 @@ namespace ExecutionResultsReporter.TestRail
 			}
 
 			JContainer result;
+            _log.Debug("Response body is : " + text);
 			if (text != "")
 			{
 				if (text.StartsWith("["))
