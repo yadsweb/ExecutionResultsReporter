@@ -536,6 +536,10 @@ namespace ExecutionResultsReporter.TestRail
 
         public TestPlan CloseTestPlan(string planId)
         {
+            if (_apiClient == null)
+            {
+                CreateApiClient();
+            }
             return JsonConvert.DeserializeObject<TestPlan>(_apiClient.SendPost("close_plan/" + planId, new object()).ToString());
         }
 
