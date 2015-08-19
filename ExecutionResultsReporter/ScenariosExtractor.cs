@@ -70,7 +70,11 @@ namespace ExecutionResultsReporter
                                 }
                                 if (tempScenario.Name.Length < 249 && (tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")").Length > 250 && tmpString.Length < 230)
                                 {
-                                    tempScenario.Name = tempScenario.Name.Substring(0, 250 - ("..." + "(" + tmpString + ")").Length) + "..." + "(" + tmpString + ")";
+                                    tempScenario.Name = tempScenario.Name.Substring(0, 250 - ("..." + "(" + tmpString + ")").Length) + "..." + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                }
+                                if ((tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")").Length < 250)
+                                {
+                                    tempScenario.Name = tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
                                 }
                                 if (result.Any(scenario => scenario.Name == tempScenario.Name)) continue;
                                 _log.Info("Adding scenario with name : " + tempScenario.Name);
