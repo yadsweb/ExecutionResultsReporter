@@ -68,9 +68,9 @@ namespace ExecutionResultsReporter
                                     tmpString = "\""+tmpString + argument + "\",";
                                     tempScenario.TestCaseAttributes.Add(argument.ToString());
                                 }
-                                if ((tempScenario.Name + "(" + tmpString.Substring(1, (tmpString.Length - 1)) + ")").Length > 250 & tmpString.Length<230)
+                                if (tempScenario.Name.Length < 249 && (tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")").Length > 250 && tmpString.Length < 230)
                                 {
-                                    tempScenario.Name ="("+ tempScenario.Name.Substring(1, (tempScenario.Name.Length - 4 - (250 - (tempScenario.Name + tmpString.Substring(1, (tmpString.Length - 1)) + ")").Length)))+"..." + tmpString +")";
+                                    tempScenario.Name = tempScenario.Name.Substring(0, tempScenario.Name.Length - tmpString.Length) + "..." + "(" + tmpString + ")";
                                 }
                                 if (result.Any(scenario => scenario.Name == tempScenario.Name)) continue;
                                 _log.Info("Adding scenario with name : " + tempScenario.Name);
