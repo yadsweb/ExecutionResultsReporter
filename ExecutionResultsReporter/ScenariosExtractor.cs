@@ -70,10 +70,6 @@ namespace ExecutionResultsReporter
                                     tmpString = tmpString + "\""+ argument + "\",";
                                     tempScenario.TestCaseAttributes.Add(argument.ToString());
                                 }
-                                if (tempScenario.Name.Length < 249 && (tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")").Length > 250 && tmpString.Length < 230)
-                                {
-                                    newName = tempScenario.Name.Substring(0, 250 - ("..." + "(" + tmpString + ")").Length) + "..." + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
-                                }
                                 if ((tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")").Length < 250)
                                 {
                                     newName = tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
