@@ -5,6 +5,7 @@ using System.Reflection;
 using ExecutionResultsReporter.TestRail;
 using log4net;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 
 namespace ExecutionResultsReporter
 {
@@ -56,7 +57,7 @@ namespace ExecutionResultsReporter
                                 var testCaseAttribute = ((TestCaseAttribute)attribute);
                                 _log.Info("Found test case attribute with '" + testCaseAttribute.Arguments.Count() + "' argument's.");
                                 _log.Info("Adding the attributes arguments to the scenario name in format (\"argument1\",\"argument2\".....).");
-                                var tmpString = "\"";
+                                var tmpString = "";
                                 foreach (var argument in testCaseAttribute.Arguments)
                                 {
                                     if (argument == null)
@@ -64,22 +65,22 @@ namespace ExecutionResultsReporter
                                         continue;
                                     }
                                     _log.Info("\t " + argument);
-                                    tmpString = tmpString + argument + "\",";
+                                    tmpString = "\""+tmpString + argument + "\",";
                                     tempScenario.TestCaseAttributes.Add(argument.ToString());
                                 }
-                                if ((tempScenario.Name + "(" + tmpString.Substring(1, (tmpString.Length - 1)) + ")").Length>250)
+                                if ((tempScenario.Name + "(" + tmpString.Substring(1, (tmpString.Length - 1)) + ")").Length > 250 & tmpString.Length<230)
                                 {
-                                    tempScenario.Name = tempScenario.Name.Substring(1, (tempScenario.Name.Length - 4 - (250 - (tempScenario.Name + tmpString.Substring(1, (tmpString.Length - 1)) + ")").Length)))+"...";
+                                    tempScenario.Name ="("+ tempScenario.Name.Substring(1, (tempScenario.Name.Length - 4 - (250 - (tempScenario.Name + tmpString.Substring(1, (tmpString.Length - 1)) + ")").Length)))+"..." + tmpString +")";
                                 }
-                                _log.Info("Adding scenario with name : " + tempScenario.Name + "(" + tmpString.Substring(1, (tmpString.Length - 1)) + ")");
+                                if (result.Any(scenario => scenario.Name == tempScenario.Name)) continue;
+                                _log.Info("Adding scenario with name : " + tempScenario.Name);
                                 result.Add(new ScenarioObj
                                 {
-                                    Name = tempScenario.Name +"(" + tmpString.Substring(1,(tmpString.Length-1)) +")",
+                                    Name = tempScenario.Name,
                                     FeatureName = tempScenario.FeatureName,
                                     CategoryAttribute = tempScenario.CategoryAttribute,
                                     TestCaseAttributes = tempScenario.TestCaseAttributes
                                 });
-
                             }
                         }
                         else
