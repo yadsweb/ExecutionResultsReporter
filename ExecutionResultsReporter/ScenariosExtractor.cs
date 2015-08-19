@@ -52,8 +52,10 @@ namespace ExecutionResultsReporter
                         tempScenario.FeatureName = featureName;
                         if (attributes.Any(attribute => attribute.GetType() == typeof(TestCaseAttribute)))
                         {
+                            
                             foreach (var attribute in attributes.Where(attribute => attribute.GetType() == typeof(TestCaseAttribute)))
                             {
+                                var newName = "";
                                 var testCaseAttribute = ((TestCaseAttribute)attribute);
                                 _log.Info("Found test case attribute with '" + testCaseAttribute.Arguments.Count() + "' argument's.");
                                 _log.Info("Adding the attributes arguments to the scenario name in format (\"argument1\",\"argument2\".....).");
@@ -65,22 +67,22 @@ namespace ExecutionResultsReporter
                                         continue;
                                     }
                                     _log.Info("\t " + argument);
-                                    tmpString = "\""+tmpString + argument + "\",";
+                                    tmpString = tmpString + "\""+ argument + "\",";
                                     tempScenario.TestCaseAttributes.Add(argument.ToString());
                                 }
                                 if (tempScenario.Name.Length < 249 && (tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")").Length > 250 && tmpString.Length < 230)
                                 {
-                                    tempScenario.Name = tempScenario.Name.Substring(0, 250 - ("..." + "(" + tmpString + ")").Length) + "..." + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                    newName = tempScenario.Name.Substring(0, 250 - ("..." + "(" + tmpString + ")").Length) + "..." + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
                                 }
                                 if ((tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")").Length < 250)
                                 {
-                                    tempScenario.Name = tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                    newName = tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
                                 }
                                 if (result.Any(scenario => scenario.Name == tempScenario.Name)) continue;
                                 _log.Info("Adding scenario with name : " + tempScenario.Name);
                                 result.Add(new ScenarioObj
                                 {
-                                    Name = tempScenario.Name,
+                                    Name = newName,
                                     FeatureName = tempScenario.FeatureName,
                                     CategoryAttribute = tempScenario.CategoryAttribute,
                                     TestCaseAttributes = tempScenario.TestCaseAttributes
