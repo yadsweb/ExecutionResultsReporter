@@ -42,21 +42,6 @@ namespace ExecutionResultsReporter
                             tempScenario.Name = scenarioName;
                             break;
                         }
-                        foreach (var attribute in attributes.Where(attribute => attribute.GetType() == typeof(TestCaseAttribute)))
-                        {
-                            var testCaseAttribute = ((TestCaseAttribute)attribute);
-                            _log.Info("Found test case attribute with '" + testCaseAttribute.Arguments.Count() + "' argument's.");
-                            foreach (var argument in testCaseAttribute.Arguments)
-                            {
-                                if (argument == null)
-                                {
-                                    continue;
-                                }
-                                _log.Info("\t " + argument);
-                                tempScenario.TestCaseAttributes.Add(argument.ToString());
-                            }
-
-                        }
                         foreach (var attribute in attributes.Where(attribute => attribute.GetType() == typeof(CategoryAttribute)))
                         {
                             var category = ((CategoryAttribute)attribute);
@@ -64,7 +49,43 @@ namespace ExecutionResultsReporter
                             tempScenario.CategoryAttribute.Add(category.Name);
                         }
                         tempScenario.FeatureName = featureName;
-                        result.Add(tempScenario);
+                        if (attributes.Any(attribute => attribute.GetType() == typeof(TestCaseAttribute)))
+                        {
+                            foreach (var attribute in attributes.Where(attribute => attribute.GetType() == typeof(TestCaseAttribute)))
+                            {
+                                var testCaseAttribute = ((TestCaseAttribute)attribute);
+                                _log.Info("Found test case attribute with '" + testCaseAttribute.Arguments.Count() + "' argument's.");
+                                _log.Info("Adding the attributes arguments to the scenario name in format (\"argument1\",\"argument2\".....).");
+                                var tmpString = "\"";
+                                foreach (var argument in testCaseAttribute.Arguments)
+                                {
+                                    if (argument == null)
+                                    {
+                                        continue;
+                                    }
+                                    _log.Info("\t " + argument);
+                                    tmpString = tmpString + argument + "\",";
+                                    tempScenario.TestCaseAttributes.Add(argument.ToString());
+                                }
+                                if ((tempScenario.Name + "(" + tmpString.Substring(1, (tmpString.Length - 1)) + ")").Length>250)
+                                {
+                                    tempScenario.Name = tempScenario.Name.Substring(1, (tempScenario.Name.Length - 4 - (250 - (tempScenario.Name + tmpString.Substring(1, (tmpString.Length - 1)) + ")").Length)))+"...";
+                                }
+                                _log.Info("Adding scenario with name : " + tempScenario.Name + "(" + tmpString.Substring(1, (tmpString.Length - 1)) + ")");
+                                result.Add(new ScenarioObj
+                                {
+                                    Name = tempScenario.Name +"(" + tmpString.Substring(1,(tmpString.Length-1)) +")",
+                                    FeatureName = tempScenario.FeatureName,
+                                    CategoryAttribute = tempScenario.CategoryAttribute,
+                                    TestCaseAttributes = tempScenario.TestCaseAttributes
+                                });
+
+                            }
+                        }
+                        else
+                        {
+                            result.Add(tempScenario);
+                        }
                     }
                 }
             }
