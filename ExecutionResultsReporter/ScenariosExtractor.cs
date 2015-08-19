@@ -70,11 +70,11 @@ namespace ExecutionResultsReporter
                                     tmpString = tmpString + "\""+ argument + "\",";
                                     tempScenario.TestCaseAttributes.Add(argument.ToString());
                                 }
-                                if ((tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")").Length < 250)
+                                if ((newName + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")").Length < 250)
                                 {
-                                    newName = tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                    newName = newName + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
                                 }
-                                if (result.Any(scenario => scenario.Name == tempScenario.Name)) continue;
+                                if (result.Any(scenario => scenario.Name == newName)) continue;
                                 _log.Info("Adding scenario with name : " + newName);
                                 result.Add(new ScenarioObj
                                 {
