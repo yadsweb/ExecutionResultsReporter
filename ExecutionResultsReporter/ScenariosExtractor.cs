@@ -55,7 +55,7 @@ namespace ExecutionResultsReporter
                             
                             foreach (var attribute in attributes.Where(attribute => attribute.GetType() == typeof(TestCaseAttribute)))
                             {
-                                var newName = "";
+                                var newName = tempScenario.Name;
                                 var testCaseAttribute = ((TestCaseAttribute)attribute);
                                 _log.Info("Found test case attribute with '" + testCaseAttribute.Arguments.Count() + "' argument's.");
                                 _log.Info("Adding the attributes arguments to the scenario name in format (\"argument1\",\"argument2\".....).");
@@ -79,7 +79,7 @@ namespace ExecutionResultsReporter
                                     newName = tempScenario.Name + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
                                 }
                                 if (result.Any(scenario => scenario.Name == tempScenario.Name)) continue;
-                                _log.Info("Adding scenario with name : " + tempScenario.Name);
+                                _log.Info("Adding scenario with name : " + newName);
                                 result.Add(new ScenarioObj
                                 {
                                     Name = newName,
