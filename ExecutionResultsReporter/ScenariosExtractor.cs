@@ -71,6 +71,7 @@ namespace ExecutionResultsReporter
                                     tempScenario.TestCaseAttributes.Add(argument.ToString());
                                 }
                                 newName = newName + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                _log.Info("Updated temp scenario name is: "+newName);
                                 if (newName.Length > 250)
                                 {
                                     var caseIdString = "";
