@@ -70,9 +70,22 @@ namespace ExecutionResultsReporter
                                     tmpString = tmpString + "\""+ argument + "\",";
                                     tempScenario.TestCaseAttributes.Add(argument.ToString());
                                 }
-                                if ((newName + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")").Length < 250)
+                                newName = newName + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                if (newName.Length > 250)
                                 {
-                                    newName = newName + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                    var caseIdString = "";
+                                    if (tempScenario.CategoryAttribute.Any())
+                                    {
+                                        caseIdString = (from caseId in tempScenario.CategoryAttribute where caseId.ToLower().StartsWith("caseid:") select caseId.ToLower().Replace("caseid:", "").Trim()).FirstOrDefault() ?? "";
+                                    }
+                                    if (!string.IsNullOrEmpty(caseIdString))
+                                    {
+                                        newName = tempScenario.Name.Substring(0, newName.Length - (newName.Length - 246 - caseIdString.Length)) + "..." +caseIdString+ "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                    }
+                                    else
+                                    {
+                                        newName = tempScenario.Name.Substring(0, newName.Length - (newName.Length - 246)) +"..."+ "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                    }
                                 }
                                 if (result.Any(scenario => scenario.Name == newName)) continue;
                                 _log.Info("Adding scenario with name : " + newName);
