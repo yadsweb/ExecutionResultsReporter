@@ -80,7 +80,7 @@ namespace ExecutionResultsReporter
                                     }
                                     if (!string.IsNullOrEmpty(caseIdString))
                                     {
-                                        newName = tempScenario.Name.Substring(0, newName.Length - (newName.Length - 246 - caseIdString.Length)) + "..." +caseIdString+ "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                        newName = tempScenario.Name.Substring(0, tempScenario.Name.Length - (newName.Length - 246 + caseIdString.Length)) + "..." + caseIdString + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
                                     }
                                     else
                                     {
