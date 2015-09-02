@@ -72,21 +72,29 @@ namespace ExecutionResultsReporter
                                 }
                                 newName = newName + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
                                 _log.Info("Updated temp scenario name is: "+newName);
-                                if (newName.Length > 250)
+                                try
                                 {
-                                    var caseIdString = "";
-                                    if (tempScenario.CategoryAttribute.Any())
+                                    if (newName.Length > 250)
                                     {
-                                        caseIdString = (from caseId in tempScenario.CategoryAttribute where caseId.ToLower().StartsWith("caseid:") select caseId.ToLower().Replace("caseid:", "").Trim()).FirstOrDefault() ?? "";
+                                        var caseIdString = "";
+                                        if (tempScenario.CategoryAttribute.Any())
+                                        {
+                                            caseIdString = (from caseId in tempScenario.CategoryAttribute where caseId.ToLower().StartsWith("caseid:") select caseId.ToLower().Replace("caseid:", "").Trim()).FirstOrDefault() ?? "";
+                                        }
+                                        if (!string.IsNullOrEmpty(caseIdString))
+                                        {
+                                            newName = tempScenario.Name.Substring(0, tempScenario.Name.Length - (newName.Length - 246 + caseIdString.Length)) + "..." + caseIdString + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                        }
+                                        else
+                                        {
+                                            newName = tempScenario.Name.Substring(0, tempScenario.Name.Length - (newName.Length - 246)) + "..." + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
+                                        }
                                     }
-                                    if (!string.IsNullOrEmpty(caseIdString))
-                                    {
-                                        newName = tempScenario.Name.Substring(0, tempScenario.Name.Length - (newName.Length - 246 + caseIdString.Length)) + "..." + caseIdString + "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
-                                    }
-                                    else
-                                    {
-                                        newName = tempScenario.Name.Substring(0, newName.Length - (newName.Length - 246)) +"..."+ "(" + tmpString.Substring(0, (tmpString.Length - 1)) + ")";
-                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    _log.Warn("Exception appear when trying to trim the scenario name! \n"+e.StackTrace);
+                                    newName = tempScenario.Name;
                                 }
                                 if (result.Any(scenario => scenario.Name == newName)) continue;
                                 _log.Info("Adding scenario with name : " + newName);
