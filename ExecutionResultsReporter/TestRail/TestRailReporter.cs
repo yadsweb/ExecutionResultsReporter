@@ -543,13 +543,22 @@ namespace ExecutionResultsReporter.TestRail
             return JsonConvert.DeserializeObject<TestPlan>(_apiClient.SendPost("close_plan/" + planId, new object()).ToString());
         }
 
-        public List<TestCase> CreatListWithRelevantTestCaseObjects(IEnumerable<ScenarioObj> scenarious, string executionCategory)
+        public List<TestCase> CreatListWithRelevantTestCaseObjects(IEnumerable<ScenarioObj> scenarious, string executionCategoryRaw)
         {
             var relevantTestCase = new List<TestCase>();
+            var executionCategory = new List<string>();
+            if (executionCategoryRaw.Contains(";"))
+            {
+                executionCategory.AddRange(executionCategoryRaw.Split(';'));
+            }
+            else
+            {
+                executionCategory.Add(executionCategoryRaw); 
+            }
             foreach (var scenarioObj in scenarious)
             {
                 var featureName = scenarioObj.FeatureName;
-                if (!string.IsNullOrEmpty(executionCategory) && !scenarioObj.CategoryAttribute.Contains(executionCategory))
+                if (executionCategory.Any(string.IsNullOrEmpty) && scenarioObj.CategoryAttribute.Any(c => executionCategory.Any(c.Contains)))
                 {
                     _log.Info("Scenario with name '" + scenarioObj.Name + "' from feature '" + scenarioObj.FeatureName + "' is not marked for execution");
                     continue;
