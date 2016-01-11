@@ -9,7 +9,7 @@ namespace ExecutionResultsReporterTests
 {
     public class Tests
     {
-        private readonly ConfigurationRetriver CfgRetriver = new ConfigurationRetriver();
+        //private readonly ConfigurationRetriver CfgRetriver = new ConfigurationRetriver();
 
         ////Tests are not implemented yet commented method was just for development purposes
         //[Test]
