@@ -195,7 +195,7 @@ namespace ExecutionResultsReporter.TestRail
                 var timeToSleep = 5000;
                 if (response.Headers.AllKeys.Contains("Retry-After"))
                 {
-                    timeToSleep = Convert.ToInt32(response.Headers["Retry-After"]);
+                    timeToSleep = Convert.ToInt32(response.Headers["Retry-After"]) * 1000;
                     _log.Debug("Response headers contains 'Retry-After' so the time to sleep before retrying will be set to '" + timeToSleep + "'");
                 }
                 _log.Debug("Response headers: ");
