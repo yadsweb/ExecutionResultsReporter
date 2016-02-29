@@ -10,9 +10,11 @@
  */
 
 using System;
+using System.Linq;
 using System.Net;
 using System.IO;
 using System.Text;
+using System.Threading;
 using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -94,6 +96,8 @@ namespace ExecutionResultsReporter.TestRail
 		private object SendRequest(string method, string uri, object data)
 		{
 			var url = _mUrl + uri;
+            var text = "";
+            JContainer result;
 
 			// Create the request object and set the required HTTP method
 			// (GET/POST) and headers (content type and basic auth).
@@ -149,18 +153,23 @@ namespace ExecutionResultsReporter.TestRail
 			}
 
 			// Read the response body, if any, and deserialize it from JSON.
-			var text = "";
-			if (response != null)
-			{
-				var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8);
 
-				using (reader)
-				{
-					text = reader.ReadToEnd();
-				}
-			}
+            if (response != null)
+            {
+                var responseStream = response.GetResponseStream();
+                if (responseStream == null)
+                {
+                    throw new Exception("Response stream from response is '" + response + "' null!");
+                }
+                var reader = new StreamReader(responseStream, Encoding.UTF8);
 
-			JContainer result;
+                using (reader)
+                {
+                    text = reader.ReadToEnd();
+                }
+            }
+
+			
             _log.Debug("Response body is : " + text);
 			if (text != "")
 			{
@@ -181,9 +190,70 @@ namespace ExecutionResultsReporter.TestRail
 			// Check for any occurred errors and add additional details to
 			// the exception message, if any (e.g. the error message returned
 			// by TestRail).
+            if ((int)response.StatusCode == 429)
+            {
+                var timeToSleep = 5000;
+                if (response.Headers.AllKeys.Contains("Retry-After"))
+                {
+                    timeToSleep = Convert.ToInt32(response.Headers["Retry-After"]);
+                    _log.Debug("Response headers contains 'Retry-After' so the time to sleep before retrying will be set to '" + timeToSleep + "'");
+                }
+                _log.Debug("Response headers: ");
+                foreach (var header in response.Headers)
+                {
+                    _log.Debug("\t\t" + header);
+                }
+                _log.Debug("Didn't contains 'Retry-After' we will sleep the default time interval of 5 seconds.");
+                Thread.Sleep(timeToSleep);
+                try
+                {
+                    response = (HttpWebResponse)request.GetResponse();
+                }
+                catch (WebException e)
+                {
+                    if (e.Response == null)
+                    {
+                        throw;
+                    }
+
+                    response = (HttpWebResponse)e.Response;
+                    ex = e;
+                }
+                if (response != null)
+                {
+                    var responseStream = response.GetResponseStream();
+                    if (responseStream == null)
+                    {
+                        throw new Exception("Response stream from response is '" + response + "' null!");
+                    }
+                    var reader = new StreamReader(responseStream, Encoding.UTF8);
+
+                    using (reader)
+                    {
+                        text = reader.ReadToEnd();
+                    }
+                }
+                _log.Debug("Response body is : " + text);
+                if (text != "")
+                {
+                    if (text.StartsWith("["))
+                    {
+                        result = JArray.Parse(text);
+                    }
+                    else
+                    {
+                        result = JObject.Parse(text);
+                    }
+                }
+                else
+                {
+                    result = new JObject();
+                }
+            }
+
 			if (ex != null)
 			{
-				string error = (string) result["error"];
+				var error = (string) result["error"];
 				if (error != null)
 				{
 					error = '"' + error + '"';
