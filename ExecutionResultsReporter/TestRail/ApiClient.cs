@@ -146,6 +146,7 @@ namespace ExecutionResultsReporter.TestRail
             }
             if ((int)response.StatusCode == 429)
             {
+                ex = null;
                 var timeToSleep = 5000;
                 if (response.Headers.AllKeys.Contains("Retry-After"))
                 {
