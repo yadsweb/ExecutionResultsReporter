@@ -26,12 +26,23 @@ namespace ExecutionResultsReporter.TestRail
             {
                 Log.Warn("File with sore already exist its content will be overwritten.");
             }
-                File.WriteAllText(_path,info);
+            File.WriteAllText(_path, info);
         }
 
         public TestPlan GetPlanFromFileStore()
         {
-            return JsonConvert.DeserializeObject<TestPlan>(File.ReadAllText(_path));
+            var testPlan = new StringBuilder();
+            Log.Debug("Current store.txt path: " + _path);
+            using (var propertyFile = new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var reader = new StreamReader(propertyFile, Encoding.Unicode))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    testPlan.Append(line);
+                }
+            }
+            return JsonConvert.DeserializeObject<TestPlan>(testPlan.ToString());
         }
 
         public void DeleteFileStore()
@@ -42,7 +53,7 @@ namespace ExecutionResultsReporter.TestRail
             }
             else
             {
-                Log.Warn("File with path '"+_path+"' didn't exist!");
+                Log.Warn("File with path '" + _path + "' didn't exist!");
             }
         }
 
