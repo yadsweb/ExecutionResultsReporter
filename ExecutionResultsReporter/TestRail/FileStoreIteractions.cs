@@ -34,7 +34,7 @@ namespace ExecutionResultsReporter.TestRail
             var testPlan = new StringBuilder();
             Log.Debug("Current store.txt path: " + _path);
             using (var propertyFile = new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var reader = new StreamReader(propertyFile, Encoding.Unicode))
+            using (var reader = new StreamReader(propertyFile))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
