@@ -23,5 +23,7 @@
   <file src="ResultReporterExecutable\bin\**\ResultReporterExecutable.exe" target="lib\net45"/>
   <file src="ResultReporterExecutable\bin\**\ResultReporterExecutable.exe.config" target="lib\net45"/>
   <file src="ResultReporterExecutable\bin\**\ResultReporterExecutable.pdb" target="lib\net45"/>
+  <file src="ResultReporterExecutable\bin\**\RestSharp.dll" target="lib\net45"/>
+  <file src="ResultReporterExecutable\bin\**\RestSharp.xml" target="lib\net45"/>
 </files>
 </package>
