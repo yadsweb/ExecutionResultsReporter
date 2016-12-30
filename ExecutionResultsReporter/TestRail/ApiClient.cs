@@ -89,9 +89,8 @@ namespace ExecutionResultsReporter.TestRail
                     _log.Debug("Didn't contains 'Retry-After' we will sleep the default time interval of 5 seconds.");
                     Thread.Sleep(timeToSleep);
                 }
-
+                response = client.Execute(request);
             }
-            response = client.Execute(request);
             _log.Debug("Response body is: " + response.Content);
             return response.Content;
         }
