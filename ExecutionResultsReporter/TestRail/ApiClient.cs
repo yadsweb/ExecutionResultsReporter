@@ -73,7 +73,7 @@ namespace ExecutionResultsReporter.TestRail
             var response = client.Execute(request);
             if ((int)response.StatusCode == 429)
             {
-                var timeToSleep = 5000;
+                var timeToSleep = 60000;
                 if (response.Headers.ToList().Any(element => element.Name == "Retry-After"))
                 {
                     timeToSleep = Convert.ToInt32(response.Headers.ToList().Single(element => element.Name == "Retry-After").Value) * 1000;
@@ -86,9 +86,9 @@ namespace ExecutionResultsReporter.TestRail
                     {
                         _log.Debug("\t\t" + header);
                     }
-                    _log.Debug("Didn't contains 'Retry-After' we will sleep the default time interval of 5 seconds.");
-                    Thread.Sleep(timeToSleep);
+                    _log.Debug("Didn't contains 'Retry-After' we will sleep the default time interval of 60 seconds.");
                 }
+                Thread.Sleep(timeToSleep);
                 response = client.Execute(request);
             }
             _log.Debug("Response body is: " + response.Content);
